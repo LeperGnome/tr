@@ -80,7 +80,10 @@ func (t *Tree) RenameMarked(newName string) error {
 	return nil
 }
 func (t *Tree) CreateFileInCurrent(name string) error {
-	_, err := os.Create(filepath.Join(t.CurrentDir.Path, name))
+	f, err := os.Create(filepath.Join(t.CurrentDir.Path, name))
+	if err == nil {
+		defer f.Close()
+	}
 	return err
 }
 func (t *Tree) CreateDirectoryInCurrent(name string) error {
