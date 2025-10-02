@@ -6,8 +6,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	runtime "runtime"
 	"slices"
 	"strings"
+	"syscall"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -155,8 +157,7 @@ func (t *Tree) DeleteMarked() error {
 		return nil
 	}
 	for _, marked := range t.Marked {
-		cmd := exec.Command("rm", "-r", marked.Path)
-		err := cmd.Run()
+		err := os.RemoveAll(marked.Path)
 		if err != nil {
 			return err // todo: this is not the same error...?
 		}
@@ -176,10 +177,32 @@ func (t *Tree) CopyMarkedToCurrentDir() error {
 		}
 		targetPath := filepath.Join(targetDir, targetFileName)
 
-		cmd := exec.Command("cp", "-r", marked.Path, targetPath)
-		err = cmd.Run()
-		if err != nil {
-			return err // todo: this is not the same error...?
+		if runtime.GOOS == "windows" {
+			// exec.Command formats args in a way that robocopy doesn't like
+			// https://github.com/golang/go/issues/15566
+			cmd := exec.Command("robocopy")
+			if marked.Info.IsDir() {
+				options := `/R:2 /W:1 /E`
+				args := fmt.Sprintf(` %s %s %s`, marked.Path, targetPath, options)
+				cmd.SysProcAttr = &syscall.SysProcAttr{CmdLine: args}
+			} else {
+				options := `/R:2 /W:1`
+				fromDir := filepath.Dir(marked.Path)
+				args := fmt.Sprintf(` %s %s %s %s`, fromDir, targetDir, targetFileName, options)
+				cmd.SysProcAttr = &syscall.SysProcAttr{CmdLine: args}
+			}
+			err = cmd.Run()
+			// exit code 1 is success
+			// https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility
+			if err != nil && err.Error() != "exit status 1" {
+				return err
+			}
+		} else {
+			cmd := exec.Command("cp", "-r", marked.Path, targetPath)
+			err = cmd.Run()
+			if err != nil {
+				return err // todo: this is not the same error...?
+			}
 		}
 	}
 	t.Marked = nil
@@ -197,8 +220,7 @@ func (t *Tree) MoveMarkedToCurrentDir() error {
 		}
 		targetPath := filepath.Join(targetDir, targetFileName)
 
-		cmd := exec.Command("mv", "-n", marked.Path, targetPath)
-		err = cmd.Run()
+		err = os.Rename(marked.Path, targetPath)
 		if err != nil {
 			return err // todo: this is not the same error...?
 		}
