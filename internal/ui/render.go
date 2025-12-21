@@ -97,7 +97,12 @@ func (r *Renderer) Render(s *state.State, window Dimentions) string {
 
 	// section is half a screen, devided vertically
 	// left for tree, right for file preview
-	sectionWidth := int(math.Floor(0.5 * float64(window.Width)))
+	var sectionWidth int
+	if s.ExpandedTree {
+		sectionWidth = window.Width
+	} else {
+		sectionWidth = int(math.Floor(0.5 * float64(window.Width)))
+	}
 
 	renderedTree := r.renderTree(s.Tree, Dimentions{Height: window.Height - headLen, Width: sectionWidth})
 
@@ -170,13 +175,22 @@ func (r *Renderer) renderHeading(s *state.State, width int) (string, int) {
 		r.Style.FinfoSize.Render(size),
 	)
 
+	left := r.Style.SelectedPath.Render(rawPath)
+	var right string
+	if !s.ExpandedTree {
+		right = r.Style.HelpMsg.Render(helpPreview)
+	}
+
+	gap := max(width-lipgloss.Width(left)-lipgloss.Width(right), 0)
+
+	topBar := lipgloss.JoinHorizontal(lipgloss.Top,
+		left,
+		strings.Repeat(" ", gap),
+		right,
+	)
+
 	header := []string{
-		r.Style.SelectedPath.Render(rawPath) +
-			strings.Repeat(
-				" ",
-				max(width-utf8.RuneCountInString(rawPath)-utf8.RuneCountInString(helpPreview), 0),
-			) +
-			r.Style.HelpMsg.Render(helpPreview),
+		topBar,
 		finfo,
 		r.Style.OperationBar.Render(operationBar),
 		r.Style.ErrBar.Render(s.ErrBuf),
@@ -201,6 +215,7 @@ func (r *Renderer) renderHelp(width int) (string, int) {
 		"gg               Go to top most child in current directory",
 		"G                Go to last child in current directory",
 		"H                Toggle hidden files in current directory",
+		"L                Toggle expanded mode",
 		"enter            Open / close selected directory or open file (xdg-open / open)",
 		"esc              Clear error message / stop current operation / drop marks",
 		"?                Toggle help",

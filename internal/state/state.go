@@ -46,13 +46,14 @@ func (o Operation) IsInput() bool {
 }
 
 type State struct {
-	Tree        *t.Tree
-	OpBuf       Operation
-	PrevOpBuf   Operation
-	InputBuf    []rune
-	ErrBuf      string
-	NodeChanges <-chan t.NodeChange
-	HelpToggle  bool
+	Tree         *t.Tree
+	OpBuf        Operation
+	PrevOpBuf    Operation
+	InputBuf     []rune
+	ErrBuf       string
+	NodeChanges  <-chan t.NodeChange
+	HelpToggle   bool
+	ExpandedTree bool
 }
 
 func InitState(root string) (*State, error) {
@@ -290,6 +291,8 @@ func (s *State) processKeyDefault(msg tea.KeyMsg) tea.Cmd {
 		if err := s.Tree.ToggleHiddenInCurrentDirectory(); err != nil {
 			s.ErrBuf = err.Error()
 		}
+	case "L":
+		s.ExpandedTree = !s.ExpandedTree
 	case "?":
 		s.HelpToggle = !s.HelpToggle
 	case "enter":
