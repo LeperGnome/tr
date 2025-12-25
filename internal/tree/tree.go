@@ -17,8 +17,9 @@ type Tree struct {
 	CurrentDir *Node
 	Marked     []*Node
 
-	sortingFunc NodeSortingFunc
-	watcher     *fsnotify.Watcher
+	sortingFunc    NodeSortingFunc
+	watcher        *fsnotify.Watcher
+	flatNavigation bool
 }
 
 func (t *Tree) GetSelectedChild() *Node {
@@ -86,14 +87,61 @@ func (t *Tree) CreateFileInCurrent(name string) error {
 func (t *Tree) CreateDirectoryInCurrent(name string) error {
 	return os.Mkdir(filepath.Join(t.CurrentDir.Path, name), os.ModePerm)
 }
-func (t *Tree) SelectNextChild() {
-	if t.CurrentDir.selectedChildIdx < len(t.CurrentDir.Children)-1 {
-		t.CurrentDir.selectedChildIdx += 1
+func RecurseIntoNode(n *Node, index int, c *Node) (*Node, int) {
+	lenChildren := len(c.Children)
+	if lenChildren == 0 {
+		return n, index
+	} else {
+		index := lenChildren - 1
+		return RecurseIntoNode(c, index, c.Children[index])
+	}
+}
+func RecurseOutOfNode(n *Node) *Node {
+	if n == nil {
+		return nil
+	}
+	if n.selectedChildIdx < len(n.Children)-1 {
+		return n
+	} else {
+		return RecurseOutOfNode(n.Parent)
 	}
 }
 func (t *Tree) SelectPreviousChild() {
-	if t.CurrentDir.selectedChildIdx > 0 {
-		t.CurrentDir.selectedChildIdx -= 1
+	if t.flatNavigation {
+		if t.CurrentDir.selectedChildIdx > 0 {
+			t.CurrentDir.selectedChildIdx -= 1
+			index := t.CurrentDir.selectedChildIdx
+			node := t.CurrentDir.Children[index]
+			dir, idx := RecurseIntoNode(t.CurrentDir, index, node)
+			t.CurrentDir = dir
+			t.CurrentDir.selectedChildIdx = idx
+		} else if t.CurrentDir.Parent != nil {
+			t.CurrentDir = t.CurrentDir.Parent
+		}
+	} else {
+		if t.CurrentDir.selectedChildIdx > 0 {
+			t.CurrentDir.selectedChildIdx -= 1
+		}
+	}
+}
+func (t *Tree) SelectNextChild() {
+	if t.flatNavigation {
+		selected := t.GetSelectedChild()
+		if selected != nil && len(selected.Children) > 0 {
+			t.CurrentDir = selected
+		} else if t.CurrentDir.selectedChildIdx < len(t.CurrentDir.Children)-1 {
+			t.CurrentDir.selectedChildIdx += 1
+		} else {
+			dir := RecurseOutOfNode(t.CurrentDir.Parent)
+			if dir != nil {
+				t.CurrentDir = dir
+				t.CurrentDir.selectedChildIdx += 1
+			}
+		}
+	} else {
+		if t.CurrentDir.selectedChildIdx < len(t.CurrentDir.Children)-1 {
+			t.CurrentDir.selectedChildIdx += 1
+		}
 	}
 }
 func (t *Tree) SetSelectedChildAsCurrent() error {
@@ -221,7 +269,7 @@ func (t *Tree) CollapseOrExpandSelected() error {
 	return nil
 }
 
-func InitTree(dir string, sortingFunc NodeSortingFunc) (*Tree, <-chan NodeChange, error) {
+func InitTree(dir string, sortingFunc NodeSortingFunc, flatNavigation bool) (*Tree, <-chan NodeChange, error) {
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, nil, err
@@ -259,10 +307,11 @@ func InitTree(dir string, sortingFunc NodeSortingFunc) (*Tree, <-chan NodeChange
 	}
 
 	tree := &Tree{
-		Root:        root,
-		CurrentDir:  root,
-		sortingFunc: sortingFunc,
-		watcher:     watcher,
+		Root:           root,
+		CurrentDir:     root,
+		sortingFunc:    sortingFunc,
+		watcher:        watcher,
+		flatNavigation: flatNavigation,
 	}
 	return tree, changeChan, nil
 }

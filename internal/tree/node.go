@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type NodeSortingFunc func(a, b *Node) int
+type NodeSortingFunc func(a, b os.DirEntry) int
 
 type Node struct {
 	Path     string
@@ -44,6 +44,8 @@ func (n *Node) readChildren(sortFunc NodeSortingFunc) error {
 	}
 	chNodes := []*Node{}
 
+
+	slices.SortFunc(children, sortFunc)
 	for _, ch := range children {
 		chInfo, err := ch.Info()
 		if err != nil {
@@ -73,7 +75,6 @@ func (n *Node) readChildren(sortFunc NodeSortingFunc) error {
 		}
 		chNodes = append(chNodes, childToAdd)
 	}
-	slices.SortFunc(chNodes, sortFunc)
 	n.Children = chNodes
 
 	// updateing selected child index if it's out of bounds after update
@@ -110,14 +111,14 @@ func NewNode(path string, info fs.FileInfo, parent *Node) *Node {
 	}
 }
 
-func defaultNodeSorting(a, b *Node) int {
+func defaultNodeSorting(a, b os.DirEntry) int {
 	// dirs first
-	if a.Info.IsDir() != b.Info.IsDir() {
-		if a.Info.IsDir() {
+	if a.IsDir() != b.IsDir() {
+		if a.IsDir() {
 			return -1
 		} else {
 			return 1
 		}
 	}
-	return strings.Compare(strings.ToLower(a.Info.Name()), strings.ToLower(b.Info.Name()))
+	return strings.Compare(strings.ToLower(a.Name()), strings.ToLower(b.Name()))
 }

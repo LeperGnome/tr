@@ -66,7 +66,7 @@ padding: 5
 file_preview: true
 highlight_indent: true
 in_place_render: false
-
+flat_navigation: false  # Ignore file hierarchy when moving up/down
 ```
 
 ## Motivation
