@@ -153,11 +153,15 @@ func (t *Tree) DeleteMarked() error {
 		return nil
 	}
 	for _, marked := range t.Marked {
-		args := append(t.deleteCmd[1:], marked.Path)
-		cmd := exec.Command(t.deleteCmd[0], args...)
-		err := cmd.Run()
+		var err error
+		if len(t.deleteCmd) > 0 {
+			args := append(t.deleteCmd[1:], marked.Path)
+			err = exec.Command(t.deleteCmd[0], args...).Run()
+		} else {
+			err = trashFile(marked.Path)
+		}
 		if err != nil {
-			return err // todo: this is not the same error...?
+			return err
 		}
 	}
 	t.Marked = nil

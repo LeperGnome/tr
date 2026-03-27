@@ -20,7 +20,7 @@ func GetConfig(flags *pflag.FlagSet) BtConfig {
 
 	vp.BindPFlags(flags)
 
-	vp.SetDefault("delete_cmd", "rm -r")
+	vp.SetDefault("delete_cmd", "")
 
 	vp.SetConfigName("conf")
 	vp.SetConfigType("yaml")

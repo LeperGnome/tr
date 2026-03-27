@@ -66,7 +66,7 @@ padding: 5
 file_preview: true
 highlight_indent: true
 in_place_render: false
-delete_cmd: "rm -r"
+delete_cmd: ""  # defaults to XDG trash (~/.local/share/Trash), set to e.g. "rm -r" to override
 
 ```
 
