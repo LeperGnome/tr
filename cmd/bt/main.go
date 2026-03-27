@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	flag "github.com/spf13/pflag"
@@ -53,8 +54,9 @@ func newModel(
 	padding int,
 	filePreview bool,
 	highlightCurrentIndent bool,
+	deleteCmd []string,
 ) (model, error) {
-	s, err := state.InitState(root)
+	s, err := state.InitState(root, deleteCmd)
 	if err != nil {
 		return model{}, err
 	}
@@ -98,6 +100,7 @@ func main() {
 		conf.Padding,
 		conf.FilePreview,
 		conf.HighlightIndent,
+		strings.Fields(conf.DeleteCmd),
 	)
 	if err != nil {
 		fmt.Printf("Error on init: %v", err)

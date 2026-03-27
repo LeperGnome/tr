@@ -66,6 +66,7 @@ padding: 5
 file_preview: true
 highlight_indent: true
 in_place_render: false
+delete_cmd: "rm -r"
 
 ```
 
@@ -109,7 +110,7 @@ Functional:
 - [x] Async preview
 - [x] Mark multiple files
 - [ ] Image preview TGP
-- [ ] Custom delete cmd
+- [x] Custom delete cmd
 - [ ] Search
 - [x] Marked to stdout on exit
 - [ ] Jump to current directory

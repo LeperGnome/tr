@@ -8,16 +8,19 @@ import (
 )
 
 type BtConfig struct {
-	Padding         int  `mapstructure:"padding"`
-	FilePreview     bool `mapstructure:"file_preview"`
-	HighlightIndent bool `mapstructure:"highlight_indent"`
-	InPlaceRender   bool `mapstructure:"in_place_render"`
+	Padding         int    `mapstructure:"padding"`
+	FilePreview     bool   `mapstructure:"file_preview"`
+	HighlightIndent bool   `mapstructure:"highlight_indent"`
+	InPlaceRender   bool   `mapstructure:"in_place_render"`
+	DeleteCmd       string `mapstructure:"delete_cmd"`
 }
 
 func GetConfig(flags *pflag.FlagSet) BtConfig {
 	vp := viper.New()
 
 	vp.BindPFlags(flags)
+
+	vp.SetDefault("delete_cmd", "rm -r")
 
 	vp.SetConfigName("conf")
 	vp.SetConfigType("yaml")
