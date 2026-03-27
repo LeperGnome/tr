@@ -110,8 +110,14 @@ func main() {
 	}
 
 	p := tea.NewProgram(m, opts...)
-	if _, err := p.Run(); err != nil {
+	finalModel, err := p.Run()
+	if err != nil {
 		fmt.Printf("Error: %v", err)
 		os.Exit(1)
+	}
+	if fm, ok := finalModel.(model); ok {
+		for _, node := range fm.appState.Tree.Marked {
+			fmt.Println(node.Path)
+		}
 	}
 }

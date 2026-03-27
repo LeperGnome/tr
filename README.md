@@ -111,7 +111,7 @@ Functional:
 - [ ] Image preview TGP
 - [ ] Custom delete cmd
 - [ ] Search
-- [ ] Marked to stdout on exit
+- [x] Marked to stdout on exit
 - [ ] Jump to current directory
 - [ ] Go higher then local root
 - [ ] Make current directory a local root
