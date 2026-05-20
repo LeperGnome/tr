@@ -1,0 +1,23 @@
+selectedPath: "#74ac6d"
+
+finfoPermissions: "#aca46d"
+finfoLastUpdated: "#e6e6e6"
+finfoSize:        "#e6e6e6"
+finfoSep:         "#2b2b2b"
+
+operationBar:      "#e6e6e6"
+operationBarInput: "#3c3c3c"
+
+errBar:      "#ac6d74"
+helpMsg:     "#aca46d"
+helpContent: "#8c7ca6"
+
+treeRegularFileName: "#e6e6e6"
+treeDirecotryName:   "#6d74ac"
+treeLinkName:        "#6daca4"
+treeMarkedNode:      "#363636"
+treeSelectionArrow:  "#aca46d"
+treeIndent:          "#363636"
+treeIndentSelected:  "#aca46d"
+
+plainTextPreview: "#a8a8a8"

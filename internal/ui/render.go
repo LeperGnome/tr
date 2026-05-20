@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 
 	"github.com/LeperGnome/bt/internal/state"
 	t "github.com/LeperGnome/bt/internal/tree"
@@ -185,32 +186,42 @@ func (r *Renderer) renderHeading(s *state.State, width int) (string, int) {
 }
 
 func (r *Renderer) renderHelp(width int) (string, int) {
-	help := []string{
-		"j / arr down     Select next child",
-		"k / arr up       Select previous child",
-		"h / arr left     Move up a dir",
-		"l / arr right    Enter selected directory",
-		"tab              Mark selected child and move down",
-		"shift+tab        Mark selected child and move up",
-		"d                Move marked children (then 'p' to paste)",
-		"y                Copy marked children (then 'p' to paste)",
-		"D                Delete marked child",
-		"if / id          Create file (if) / directory (id) in current directory",
-		"r                Rename selected child",
-		"e                Edit selected file in $EDITOR",
-		"gg               Go to top most child in current directory",
-		"G                Go to last child in current directory",
-		"H                Toggle hidden files in current directory",
-		"enter            Open / close selected directory or open file (xdg-open / open)",
-		"esc              Clear error message / stop current operation / drop marks",
-		"?                Toggle help",
-		"q / ctrl+c       Exit",
+	help := [][]string{
+		{"j / arr down", "Select next child"},
+		{"k / arr up", "Select previous child"},
+		{"h / arr left", "Move up a dir"},
+		{"l / arr right", "Enter selected directory"},
+		{"tab", "Mark selected child and move down"},
+		{"shift+tab", "Mark selected child and move up"},
+		{"d", "Move marked children (then 'p' to paste)"},
+		{"y", "Copy marked children (then 'p' to paste)"},
+		{"D", "Delete marked child"},
+		{"if / id", "Create file (if) / directory (id) in current directory"},
+		{"r", "Rename selected child"},
+		{"e", "Edit selected file in $EDITOR"},
+		{"gg", "Go to top most child in current directory"},
+		{"G", "Go to last child in current directory"},
+		{"H", "Toggle hidden files in current directory"},
+		{"enter", "Open / close selected directory or open file (xdg-open / open)"},
+		{"esc", "Clear error message / stop current operation / drop marks"},
+		{"?", "Toggle help"},
+		{"q / ctrl+c", "Exit"},
 	}
+	tableString := table.
+		New().
+		Width(width-1).
+		Headers("Keys", "Description").
+		Border(lipgloss.NormalBorder()).
+		BorderLeft(false).
+		BorderRight(false).
+		Rows(help...).
+		Render()
+
 	return r.Style.
 		HelpContent.
 		MaxWidth(width).
 		MarginRight(width).
-		Render(strings.Join(help, "\n")), len(help) + 1 // +1 for border
+		Render(tableString), len(help) + 4 // +4 for borders
 }
 
 func (r *Renderer) renderTree(tree *t.Tree, dim Dimentions) string {
