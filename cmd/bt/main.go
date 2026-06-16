@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	flag "github.com/spf13/pflag"
@@ -53,8 +54,9 @@ func newModel(
 	padding int,
 	filePreview bool,
 	highlightCurrentIndent bool,
+	deleteCmd []string,
 ) (model, error) {
-	s, err := state.InitState(root)
+	s, err := state.InitState(root, deleteCmd)
 	if err != nil {
 		return model{}, err
 	}
@@ -98,6 +100,7 @@ func main() {
 		conf.Padding,
 		conf.FilePreview,
 		conf.HighlightIndent,
+		strings.Fields(conf.DeleteCmd),
 	)
 	if err != nil {
 		fmt.Printf("Error on init: %v", err)
@@ -110,8 +113,14 @@ func main() {
 	}
 
 	p := tea.NewProgram(m, opts...)
-	if _, err := p.Run(); err != nil {
+	finalModel, err := p.Run()
+	if err != nil {
 		fmt.Printf("Error: %v", err)
 		os.Exit(1)
+	}
+	if fm, ok := finalModel.(model); ok {
+		for _, node := range fm.appState.Tree.Marked {
+			fmt.Println(node.Path)
+		}
 	}
 }

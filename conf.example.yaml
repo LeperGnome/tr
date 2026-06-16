@@ -1,0 +1,21 @@
+# bt configuration file
+# Copy to ~/.config/bt/conf.yaml to use.
+
+# Number of lines to keep visible above and below the selected item.
+# padding: 5
+
+# Show a preview pane for the selected file.
+# Use [ and ] to grow/shrink the pane while bt is running.
+# file_preview: true
+
+# Highlight the indent column of the currently selected item.
+# highlight_indent: true
+
+# Render in the current terminal window instead of an alternate screen.
+# Useful for keeping bt output visible after exit.
+# in_place_render: false
+
+# Command used to delete files. The target path is always appended as the
+# final argument, e.g. "trash" becomes: trash /path/to/file
+# Leave empty (the default) to use the built-in XDG trash (~/.local/share/Trash).
+# delete_cmd: ""

@@ -66,6 +66,7 @@ padding: 5
 file_preview: true
 highlight_indent: true
 in_place_render: false
+delete_cmd: ""  # defaults to XDG trash (~/.local/share/Trash), set to e.g. "rm -r" to override
 
 ```
 
@@ -109,9 +110,9 @@ Functional:
 - [x] Async preview
 - [x] Mark multiple files
 - [ ] Image preview TGP
-- [ ] Custom delete cmd
+- [x] Custom delete cmd
 - [ ] Search
-- [ ] Marked to stdout on exit
+- [x] Marked to stdout on exit
 - [ ] Jump to current directory
 - [ ] Go higher then local root
 - [ ] Make current directory a local root

@@ -19,6 +19,7 @@ type Tree struct {
 
 	sortingFunc NodeSortingFunc
 	watcher     *fsnotify.Watcher
+	deleteCmd   []string
 }
 
 func (t *Tree) GetSelectedChild() *Node {
@@ -152,10 +153,15 @@ func (t *Tree) DeleteMarked() error {
 		return nil
 	}
 	for _, marked := range t.Marked {
-		cmd := exec.Command("rm", "-r", marked.Path)
-		err := cmd.Run()
+		var err error
+		if len(t.deleteCmd) > 0 {
+			args := append(t.deleteCmd[1:], marked.Path)
+			err = exec.Command(t.deleteCmd[0], args...).Run()
+		} else {
+			err = trashFile(marked.Path)
+		}
 		if err != nil {
-			return err // todo: this is not the same error...?
+			return err
 		}
 	}
 	t.Marked = nil
@@ -221,7 +227,7 @@ func (t *Tree) CollapseOrExpandSelected() error {
 	return nil
 }
 
-func InitTree(dir string, sortingFunc NodeSortingFunc) (*Tree, <-chan NodeChange, error) {
+func InitTree(dir string, sortingFunc NodeSortingFunc, deleteCmd []string) (*Tree, <-chan NodeChange, error) {
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, nil, err
@@ -263,6 +269,7 @@ func InitTree(dir string, sortingFunc NodeSortingFunc) (*Tree, <-chan NodeChange
 		CurrentDir:  root,
 		sortingFunc: sortingFunc,
 		watcher:     watcher,
+		deleteCmd:   deleteCmd,
 	}
 	return tree, changeChan, nil
 }
